@@ -93,8 +93,8 @@
 
         const projectsElement = document.getElementById('projects');
 
-        for (var i = 0; i < projects.length; i++){
-          var opt = document.createElement('option');
+        for (let i = 0; i < projects.length; i++){
+          let opt = document.createElement('option');
           opt.value = projects[i].value;
           opt.innerHTML = projects[i].name;
           projectsElement.appendChild(opt);
