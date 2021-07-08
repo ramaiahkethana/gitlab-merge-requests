@@ -1,0 +1,218 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+
+    <style>
+      .form-horizontal .form-group {
+        margin-right: 0px !important;
+        margin-left: 0px !important;
+      }
+    </style>
+  </head>
+  <body>
+    <form id="mergeRequestForm" class="form-horizontal">
+      <fieldset>
+      
+      <!-- Form Name -->
+      <legend style="padding: 10px;">Merge Requests</legend>
+
+      <!-- Text input-->
+      <div class="form-group">
+        <label class="col-md-4 control-label" for="textinput">Branch</label>  
+        <div class="col-md-4">
+        <input id="textinput" name="source_branch" type="text" placeholder="Branch name" class="form-control input-md" required>
+          
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-md-4 control-label" for="textinput">Merge Request Title</label>  
+        <div class="col-md-4">
+        <input id="textinput2" name="title" type="text" placeholder="Title" class="form-control input-md" required>
+          
+        </div>
+      </div>
+      
+      <!-- Select Basic -->
+      <div class="form-group">
+        <label class="col-md-4 control-label" for="projects">Project</label>
+        <div class="col-md-4">
+          <select id="projects" name="project" class="form-control">
+            
+          </select>
+        </div>
+      </div>
+      
+      <!-- Multiple Checkboxes -->
+      <div class="form-group">
+        <label class="col-md-4 control-label" for="checkboxes">Branches</label>
+        <div class="col-md-4">
+        <div class="checkbox">
+          <label for="checkboxes-0">
+            <input type="checkbox" name="branches" id="checkboxes-0" value="dev">
+            Dev
+          </label>
+        </div>
+        <div class="checkbox">
+          <label for="checkboxes-1">
+            <input type="checkbox" name="branches" id="checkboxes-1" value="staging">
+            Staging
+          </label>
+        </div>
+        <div class="checkbox">
+          <label for="checkboxes-2">
+            <input type="checkbox" name="branches" id="checkboxes-2" value="beta">
+            Beta
+          </label>
+        </div>
+        <div class="checkbox">
+          <label for="checkboxes-3">
+            <input type="checkbox" name="branches" id="checkboxes-3" value="master">
+            Master
+          </label>
+        </div>
+        </div>
+      </div>
+      
+      <!-- Button -->
+      <div class="form-group">
+        <label class="col-md-4 control-label" for="singlebutton"></label>
+        <div class="col-md-4">
+          <button onclick="createMergeRequest()" id="singlebutton" name="singlebutton" class="btn btn-success" type="button">Submit</button>
+        </div>
+      </div>
+      
+      </fieldset>
+      </form>
+
+      <script>
+        const secretToken = localStorage.getItem('GITLAB_PRIVATE_TOKEN')
+
+        const projects = getProjects()
+
+        const projectsElement = document.getElementById('projects');
+
+        for (var i = 0; i < projects.length; i++){
+          var opt = document.createElement('option');
+          opt.value = projects[i].value;
+          opt.innerHTML = projects[i].name;
+          projectsElement.appendChild(opt);
+        }
+
+        function getMRUrl (projectId) {
+          return `https://gitlab.com/api/v4/projects/${projectId}/merge_requests?secret_token=${secretToken}`
+        }
+
+        function getProjects () {
+          let projects
+          try {
+            projects = localStorage.getItem('projects')
+
+            if (projects) {
+              projects = JSON.parse(JSON.parse(projects))
+            }
+          } catch (err) {
+            console.log(err)
+            // projects not correctly defined in local storage
+          }
+
+          projects = projects || []
+
+          return projects
+        }
+
+        function getBranches () {
+          let branches = [
+            {
+              "name": "Dev",
+              "value": "dev"
+            },
+            {
+              "name": "Staging",
+              "value": "staging"
+            },
+            {
+              "name": "Beta",
+              "value": "beta"
+            },
+            {
+              "name": "Master",
+              "value": "master"
+            }
+          ]
+
+          branches = JSON.stringify(branches)
+
+          branches = JSON.parse(branches)
+
+          return branches
+        }
+
+        function createMergeRequest() {
+          if (!confirm('Are you sure create merge request')) {
+            return
+          }
+
+          let values = $('#mergeRequestForm').serializeArray()
+          values = values.concat(
+            $('#mergeRequestForm input[type=checkbox]:not(:checked)').map(
+            function() {
+              return {"name": this.name, "value": false}
+            }).get()
+          );
+
+          const data = values.reduce((acc, cur) => {
+            if (cur.name === 'branches') {
+              if (!acc[cur.name]) {
+                acc[cur.name] = []
+              }
+
+              if (cur.value) {  
+                acc[[cur.name]].push(cur.value)
+              }
+            } else {
+              acc[cur.name] = cur.value
+            }
+
+            return acc
+          }, new Map())
+
+          const sourceBranch = data.source_branch
+          const projectId = data.project
+
+          if (!sourceBranch) {
+            return
+          }
+
+          for (let i = 0; i < data.branches.length; i++) {
+            $.ajax({
+              url: getMRUrl(projectId),
+              method: 'post',
+              beforeSend: function(request) {
+                request.setRequestHeader("PRIVATE-TOKEN", secretToken);
+              },
+              data: {
+                source_branch: sourceBranch,
+                target_branch: data.branches[i],
+                title: getTitle(data.title, sourceBranch)
+              }
+            }).then(() => {
+              alert('successfully created merge request(s)')
+            })
+          }
+
+          // resetting the data
+          $('#mergeRequestForm').trigger("reset");
+        }
+
+        function getTitle (title, sourceBranch) {
+          if (title) {
+            return title
+          }
+
+          return sourceBranch.replaceAll('-', ' ')
+        }
+      </script>
+  </body>
+</html>
