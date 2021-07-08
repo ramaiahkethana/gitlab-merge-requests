@@ -18,8 +18,12 @@ First download this html locally and open it in browser.
     }
 ]
 ```
-2. Create ```projects``` variable in local storage and place above stringified data in it.
+2. Create ```projects``` key in local storage and place above stringified data in it.
 
 ### Gitlab access token placing in local storage
 1. Create a access token from gitlab with api access
-2. Create a variable ```GITLAB_ACCESS_TOKEN``` in local storage and place the above generated token from gitlab
+2. Create a key ```GITLAB_ACCESS_TOKEN``` in local storage and place the above generated token from gitlab
+
+**Your page will be ready after placing two keys in local stoarge. Refresh the page and do the merge requests.**
+
+![local stoarge setup](https://github.com/ramaiahkethana/gitlab-merge-requests/blob/master/local_storage_setup.png?raw=true "local stoarge setup")
