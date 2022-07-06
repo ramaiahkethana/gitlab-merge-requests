@@ -22,7 +22,7 @@ First download this html locally and open it in browser.
 
 ### Gitlab access token placing in local storage
 1. Create a access token from gitlab with api access
-2. Create a key ```GITLAB_ACCESS_TOKEN``` in local storage and place the above generated token from gitlab
+2. Create a key ```GITLAB_PRIVATE_TOKEN``` in local storage and place the above generated token from gitlab
 
 **Your page will be ready after placing two keys in local stoarge. Refresh the page and do the merge requests.**
 
