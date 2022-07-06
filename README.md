@@ -18,7 +18,7 @@ First download this html locally and open it in browser.
     }
 ]
 ```
-2. Create ```projects``` key in local storage and place above stringified data in it.
+2. Create ```projects``` key in local storage and place stringified data in it. Use online tools to stringify the data. Make sure that data is in double quotes.
 
 ### Gitlab access token placing in local storage
 1. Create a access token from gitlab with api access
